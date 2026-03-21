@@ -11,6 +11,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 connectDB();
 app.use("/api", router);
-app.listen(APP_CONFIG.PORT, () => {
-    console.log(`Server is running on port ${APP_CONFIG.PORT}`);
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on port ${API_CONFIG.PORT} 🚀`);
 });
