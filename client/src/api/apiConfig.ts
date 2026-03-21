@@ -1,6 +1,4 @@
-const apiKey = import.meta.env.VITE_API_KEY;
 
-console.log("API Key:",apiKey);
  // Debugging line
 export const API_CONFIG = {
     
@@ -13,6 +11,7 @@ export const API_CONFIG = {
         },
         CONVERSATION: {
             CREATE: "/api/test",
+            GET_ANSWER: "/api/answer",
             GET_ALL: "/api/conversations",
             GET_BY_ID: (id: string) => `/api/conversations/${id}`,
             

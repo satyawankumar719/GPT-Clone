@@ -11,6 +11,7 @@ const envSchema = z.object({
     MONGO_URI: z.string(),
     FRONTEND_URL: z.string(),
     JWT_SECRET: z.string(),
+    API_KEY: z.string(),
 });
 
 
