@@ -1,11 +1,11 @@
 "use client";
 import  { useState } from "react";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
+import { Sidebar, SidebarBody,} from "@/components/ui/sidebar";
 import { Outlet } from "react-router";
 import { motion } from "motion/react";
 import { useHistory, type HistoryItem } from "@/store/HistoryContext";
 import Header from "@/components/Header/Header";
-import { apiClient } from "@/api/apiClient";
+import apiClient from "@/api/apiClient";
 import { API_CONFIG } from "@/api/apiConfig";
 
 export default function DashBoard() {
