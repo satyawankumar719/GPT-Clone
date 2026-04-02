@@ -25,9 +25,8 @@ const chatSchema = new mongoose.Schema({
     },
 });
 
-chatSchema.pre("save", function (next) {
+chatSchema.pre("save", async function() {
     this.updatedAt = Date.now();
-    next();
 });
 
 const Chat = mongoose.model("Chat", chatSchema);

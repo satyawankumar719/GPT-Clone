@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 const app = express();
 import connectDB from './config/db.js';
 import cors from 'cors';
@@ -9,6 +10,7 @@ app.use(cors({origin: APP_CONFIG.FRONTEND_URL, credentials: true}));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser());
 connectDB();
 app.use("/api", router);
 app.listen(process.env.PORT, () => {
