@@ -30,7 +30,7 @@ const ChatInput: React.FC<Inputfield> = ({ onSend, disabled = false }) => {
   };
 
   return (
-    <div className="w-full bg-white dark:bg-neutral-900 border-t dark:border-neutral-700">
+    <div className="w-full border border-none rounded-2xl bg-white dark:bg-neutral-900/50 backdrop-blur-md shadow-lg shadow-neutral-900/10">
       <div className="max-w-3xl mx-auto p-3">
         <div
           className={`flex items-end gap-2 bg-gray-100 dark:bg-neutral-800 rounded-2xl px-3 py-2 ${
@@ -45,7 +45,7 @@ const ChatInput: React.FC<Inputfield> = ({ onSend, disabled = false }) => {
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={disabled}
-            placeholder="Message ChatGPT..."
+            placeholder="Message NovaBot..."
             className="flex-1 bg-transparent dark:text-white resize-none outline-none text-sm max-h-40 disabled:opacity-50"
           />
 

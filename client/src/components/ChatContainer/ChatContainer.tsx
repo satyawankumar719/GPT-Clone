@@ -139,7 +139,10 @@ function ChatContainer() {
       
       if (error && typeof error === 'object' && 'response' in error) {
         // Axios error
-        const axiosError = error as any;
+        const axiosError = error as {
+          response?: { data?: { message?: string }, status?: number },
+          message?: string
+        };
         errorMessage = axiosError.response?.data?.message || 
                        axiosError.message || 
                        `Server error: ${axiosError.response?.status}`;
@@ -166,36 +169,47 @@ function ChatContainer() {
       fetchAnswer(message)
     }
   }
-
-  return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Chat messages */}
-      <div 
-        ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-4 md:p-6 space-y-2 scroll-smooth"
-      >
+return (
+  <div className="flex flex-col h-full overflow-hidden bg-white dark:bg-[#0d0d0d]">
+    {/* Chat messages */}
+    <div 
+      ref={chatContainerRef}
+      className="flex-1 overflow-y-auto scroll-smooth"
+    >
+      <div className="max-w-3xl mx-auto w-full px-4 py-8 md:px-6 lg:px-0 space-y-8">
         {chats.length === 0 && !selectedHistory && (
-          <div className="flex items-center justify-center h-full text-neutral-400">
-            <p>Select or create a chat to start</p>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-neutral-400 dark:text-neutral-500">
+            <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center text-3xl mb-4">
+              💬
+            </div>
+            <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-200">How can I help you today?</h2>
+            <p className="text-sm mt-1">Select a history or start a new thread.</p>
           </div>
         )}
 
         {chats.map((chat, index) => (
-          <div key={index}>
+          <div key={index} className="group animate-in fade-in slide-in-from-bottom-2 duration-300">
             <Question question={chat.question} />
             <Answer answer={chat.answer} />
           </div>
         ))}
 
-        <div ref={chatEndRef} />
-      </div>
-
-      {/* Input - fixed height so keyboard doesn't push it away */}
-      <div className="shrink-0 bg-white dark:bg-neutral-900 z-10 p-3 md:p-4 border-t dark:border-neutral-700">
-        <Inputfield onSend={onSend} disabled={loading} />
+      
+        <div ref={chatEndRef} className="h-4" />
       </div>
     </div>
-  )
+
+    {/* Input Area */}
+    <div className="shrink-0 bg-gradient-to-t from-white via-white to-transparent dark:from-[#0d0d0d] dark:via-[#0d0d0d] pt-6 pb-4">
+      <div className="max-w-3xl mx-auto w-full px-4">
+        <div className="relative mb-5 rounded-2xl bg-white dark:bg-neutral-800 shadow-sm focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all">
+           <Inputfield onSend={onSend} disabled={loading} />
+        </div>
+      
+      </div>
+    </div>
+  </div>
+)
 }
 
 export default ChatContainer

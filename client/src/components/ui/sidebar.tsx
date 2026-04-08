@@ -112,20 +112,17 @@ export const MobileSidebar = ({
   const { open, setOpen } = useSidebar();
   return (
     <>
-      <div
-        className={cn(
-          "h-10 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-neutral-100 dark:bg-neutral-800 w-full"
-        )}
-        {...props}
-      >
-        <div className="flex justify-end z-20 w-full">
-          <IconMenu2
-            className="text-neutral-800 dark:text-neutral-200"
-            onClick={() => setOpen(!open)}
-          />
-        </div>
-        <AnimatePresence>
-          {open && (
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[90] md:hidden"
+              onClick={() => setOpen(false)}
+            />
             <motion.div
               initial={{ x: "-100%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -135,21 +132,25 @@ export const MobileSidebar = ({
                 ease: "easeInOut",
               }}
               className={cn(
-                "fixed h-full w-full inset-0 bg-white dark:bg-neutral-900 p-10 z-[100] flex flex-col justify-between",
+                "fixed left-0 top-0 bottom-0 w-[min(90vw,320px)] bg-white dark:bg-neutral-900 shadow-2xl z-[100] p-6 overflow-y-auto md:hidden",
                 className
               )}
+              {...props}
             >
-              <div
-                className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200"
-                onClick={() => setOpen(!open)}
-              >
-                <IconX />
+              <div className="flex justify-end mb-6">
+                <button
+                  className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
+                  onClick={() => setOpen(false)}
+                  aria-label="Close menu"
+                >
+                  <IconX className="text-neutral-800 dark:text-neutral-200" />
+                </button>
               </div>
               {children}
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };
