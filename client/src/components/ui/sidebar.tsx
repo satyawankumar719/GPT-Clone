@@ -1,8 +1,8 @@
 "use client";
 import { cn } from "@/lib/utils";
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, createContext, useContext, } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { IconMenu2, IconX } from "@tabler/icons-react";
+import {  IconX } from "@tabler/icons-react";
 
 interface Links {
   label: string;
@@ -107,8 +107,8 @@ export const DesktopSidebar = ({
 export const MobileSidebar = ({
   className,
   children,
-  ...props
-}: React.ComponentProps<"div">) => {
+  
+}: React.HTMLAttributes<HTMLDivElement>) => {
   const { open, setOpen } = useSidebar();
   return (
     <>
@@ -135,7 +135,6 @@ export const MobileSidebar = ({
                 "fixed left-0 top-0 bottom-0 w-[min(90vw,320px)] bg-white dark:bg-neutral-900 shadow-2xl z-[100] p-6 overflow-y-auto md:hidden",
                 className
               )}
-              {...props}
             >
               <div className="flex justify-end mb-6">
                 <button
