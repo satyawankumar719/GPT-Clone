@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/store/AuthContext"
+import { Spinner } from "../ui/spinner"
 
 export default function Signup() {
   const [username, setUsername] = useState("")
@@ -18,13 +19,13 @@ export default function Signup() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [localError, setLocalError] = useState("")
-  const navigate = useNavigate()
-  const { signup, isLoading, error, clearError, token } = useAuth()
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
-  // If user is already authenticated, redirect to chat
+  const navigate = useNavigate()
+  const { signup, isLoading, clearError, token } = useAuth()
+
   useEffect(() => {
     if (token && !isLoading) {
-      console.log('User already authenticated, redirecting to chat');
       navigate("/chat", { replace: true })
     }
   }, [token, isLoading, navigate])
@@ -39,13 +40,31 @@ export default function Signup() {
     )
   }
 
+  // ✅ Retry wrapper (handles Gemini 503)
+  const retrySignup = async (retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await signup(
+          username.trim(),
+          email.trim(),
+          password
+        )
+      } catch (err: any) {
+        if (!err?.message?.includes("503") || i === retries - 1) {
+          throw err
+        }
+        await new Promise((res) => setTimeout(res, 1000 * (i + 1)))
+      }
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLocalError("")
     clearError()
 
     // Validation
-    if (!username.trim() || !email.trim() || !password || !confirmPassword) {
+    if (!username || !email || !password || !confirmPassword) {
       setLocalError("Please fill in all fields")
       return
     }
@@ -55,7 +74,6 @@ export default function Signup() {
       return
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       setLocalError("Please enter a valid email address")
@@ -73,14 +91,33 @@ export default function Signup() {
     }
 
     try {
-      console.log('Starting signup for:', email)
-      await signup(username, email, password)
-      console.log('Signup successful, navigating to chat')
+      await retrySignup()
       navigate("/chat")
-    } catch (err) {
-      console.error('Signup error:', err)
-      setLocalError(error || "Signup failed. Please try again.")
+    } catch (err: any) {
+      console.error("Signup error:", err)
+
+      if (err?.message?.includes("503")) {
+        setLocalError(
+          "Server is busy right now. Please try again in a few seconds."
+        )
+        return
+      }
+
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Signup failed. Please try again."
+
+      setLocalError(message)
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner className="w-12 h-12 text-gray-500" />
+      </div>
+    )
   }
 
   return (
@@ -92,7 +129,9 @@ export default function Signup() {
               ✨
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Create Account
+          </CardTitle>
           <CardDescription className="text-center">
             Join GPT Clone and start chatting
           </CardDescription>
@@ -100,116 +139,80 @@ export default function Signup() {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-3">
-            {(localError || error) && (
-              <div className="animate-pulse p-4 bg-red-50 border-l-4 border-red-500 rounded text-sm text-red-700 flex items-start gap-2">
-                <span className="text-lg">⚠️</span>
-                <div>{localError || error}</div>
+            {localError && (
+              <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded text-sm text-red-700">
+                ⚠️ {localError}
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
+              <Label>Full Name</Label>
               <Input
-                id="name"
                 type="text"
                 placeholder="Username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value.trim())}
+                onChange={(e) => setUsername(e.target.value)} // ✅ FIXED
                 disabled={isLoading}
-                className="h-10 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
                 required
               />
-              {username && username.length < 3 && (
-                <p className="text-xs text-orange-600 flex items-center gap-1">
-                  ℹ️ Minimum 3 characters
-                </p>
-              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+              <Label>Email</Label>
               <Input
-                id="email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value.trim())}
+                onChange={(e) => setEmail(e.target.value)} // ✅ FIXED
                 disabled={isLoading}
-                className="h-10 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+              <Label>Password</Label>
               <Input
-                id="password"
                 type="password"
-                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                className="h-10 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
                 required
               />
-              {password && password.length < 6 && (
-                <p className="text-xs text-orange-600 flex items-center gap-1">
-                  ℹ️ Minimum 6 characters
-                </p>
-              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
+              <Label>Confirm Password</Label>
               <Input
-                id="confirmPassword"
                 type="password"
-                placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
-                className="h-10 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
                 required
               />
-              {confirmPassword && password !== confirmPassword && (
-                <p className="text-xs text-red-600 flex items-center gap-1">
-                  ❌ Passwords do not match
-                </p>
-              )}
-              {confirmPassword && password === confirmPassword && password.length >= 6 && (
-                <p className="text-xs text-green-600 flex items-center gap-1">
-                  ✅ Passwords match
-                </p>
-              )}
             </div>
 
             <Button
               type="submit"
-              className="w-full h-10 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mt-2"
               disabled={isLoading || !isFormValid()}
+              className="w-full"
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Creating account...
-                </div>
-              ) : (
-                "Create Account"
-              )}
+              {isLoading ? "Creating..." : "Create Account"}
             </Button>
 
-            <div className="pt-4 border-t border-gray-200">
-              <p className="text-center text-sm text-gray-600">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => navigate("/")}
-                  className="font-semibold text-purple-600 hover:text-purple-700 transition"
-                >
-                  Sign In
-                </button>
-              </p>
-            </div>
+            <p className="text-center text-sm">
+              Already have an account?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRedirecting(true)
+                  setTimeout(() => navigate("/"), 800)
+                }}
+                disabled={isRedirecting}
+                className="text-purple-600 font-semibold"
+              >
+                {isRedirecting ? <Spinner/> : "Sign in"}
+              </button>
+            </p>
           </form>
         </CardContent>
       </Card>
