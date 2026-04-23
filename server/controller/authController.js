@@ -40,7 +40,7 @@ export const signup = async (req, res) => {
       res.cookie('authToken', token, {
     httpOnly: true,
     // Keep secure: true for production
-    secure: true, 
+    secure: process.env.NODE_ENV === 'production', 
     // CHANGE THIS: 'none' is required for cross-site cookies
     sameSite: 'none', 
     path: '/',
@@ -103,7 +103,7 @@ export const login = async (req, res) => {
         res.cookie('authToken', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'none',
             path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
