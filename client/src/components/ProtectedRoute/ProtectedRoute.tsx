@@ -22,7 +22,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Redirect to login if no token
   if (!token) {
     console.log('No token found, redirecting to login');
-    return <Navigate to="/" replace />;
+  ;
   }
 
   return <>{children}</>;

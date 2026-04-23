@@ -37,13 +37,15 @@ export const signup = async (req, res) => {
         console.log("Token created for user:", newUser._id);
         
         // Set httpOnly cookie
-        res.cookie('authToken', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        });
+      res.cookie('authToken', token, {
+    httpOnly: true,
+    // Keep secure: true for production
+    secure: true, 
+    // CHANGE THIS: 'none' is required for cross-site cookies
+    sameSite: 'none', 
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60 * 1000, 
+});
         
         console.log('Cookie set in response');
         
